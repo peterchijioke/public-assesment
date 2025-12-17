@@ -51,7 +51,7 @@
   --radius: 0.75rem;
 
   /* Base */
-  --background: oklch(0.99 0.01 260);
+  --background: oklch(0.997 0.003 270);
   --foreground: oklch(0.17 0.02 260);
 
   /* Card */
