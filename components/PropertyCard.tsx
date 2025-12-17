@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, CheckCircle2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 interface PropertyCardProps {
   id: string;
@@ -13,26 +13,37 @@ interface PropertyCardProps {
   isVerified: boolean;
 }
 
-const PropertyCard = ({ id, image, title, location, price, propertyType, isVerified }: PropertyCardProps) => {
-  const navigate = useNavigate();
+const PropertyCard = ({
+  id,
+  image,
+  title,
+  location,
+  price,
+  propertyType,
+  isVerified,
+}: PropertyCardProps) => {
+  const navigate = useRouter();
 
   const handleClick = () => {
-    navigate(`/property/${id}`);
+    navigate.push(`/property/${id}`);
   };
 
   return (
-    <Card 
-      className="overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 hover-scale" 
+    <Card
+      className="overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 hover-scale"
       onClick={handleClick}
     >
       <div className="relative h-48 overflow-hidden">
-        <img 
-          src={image} 
+        <img
+          src={image}
           alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute top-3 left-3 flex gap-2">
-          <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
+          <Badge
+            variant="secondary"
+            className="bg-background/90 backdrop-blur-sm"
+          >
             {propertyType}
           </Badge>
           {isVerified && (

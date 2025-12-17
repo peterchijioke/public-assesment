@@ -1,5 +1,5 @@
+"use client";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,8 @@ import { Building2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -24,7 +26,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { login } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +38,7 @@ const Login = () => {
         title: "Login successful",
         description: "Welcome back!",
       });
-      navigate("/dashboard");
+      navigate.push("/dashboard");
     } catch (error) {
       toast({
         title: "Login failed",

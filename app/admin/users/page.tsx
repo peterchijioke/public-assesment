@@ -1,19 +1,60 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { api, propertyTypeToSlug } from '@/lib/api';
-import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Eye, Trash2, Building2, User, MapPin, Mail, Calendar, ToggleLeft, ToggleRight, Globe, Briefcase } from 'lucide-react';
-import { toast } from 'sonner';
+"use client";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { api, propertyTypeToSlug } from "@/lib/api";
+import Navbar from "@/components/Navbar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Eye,
+  Trash2,
+  Building2,
+  User,
+  MapPin,
+  Mail,
+  Calendar,
+  ToggleLeft,
+  ToggleRight,
+  Globe,
+  Briefcase,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface UserDashboardItem {
   user: {
@@ -24,7 +65,7 @@ interface UserDashboardItem {
     last_name: string;
     role: string;
   };
-  profile_type: 'personal' | 'company';
+  profile_type: "personal" | "company";
   profile: PersonalProfile | CompanyProfile;
 }
 
@@ -77,12 +118,14 @@ interface Property {
 
 const AdminUsers = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const [userType, setUserType] = useState<string>('all');
-  const [searchEmail, setSearchEmail] = useState<string>('');
+  const navigate = useRouter();
+  const [userType, setUserType] = useState<string>("all");
+  const [searchEmail, setSearchEmail] = useState<string>("");
   const [users, setUsers] = useState<UserDashboardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<UserDashboardItem | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserDashboardItem | null>(
+    null
+  );
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showPropertiesDialog, setShowPropertiesDialog] = useState(false);
   const [userProperties, setUserProperties] = useState<Property[]>([]);
@@ -92,7 +135,7 @@ const AdminUsers = () => {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      navigate('/login');
+      navigate.push("/login");
       return;
     }
   }, [isAuthenticated, authLoading, navigate]);
@@ -109,8 +152,8 @@ const AdminUsers = () => {
         setUsers(response.results);
         setTotalUsers(response.count);
       } catch (error) {
-        console.error('Failed to fetch users:', error);
-        toast.error('Failed to load users');
+        console.error("Failed to fetch users:", error);
+        toast.error("Failed to load users");
       } finally {
         setIsLoading(false);
       }
@@ -130,14 +173,14 @@ const AdminUsers = () => {
     setSelectedUser(user);
     setShowPropertiesDialog(true);
     setLoadingProperties(true);
-    
+
     try {
       const properties = await api.getPropertiesByOwner(user.user.username);
       // API returns array directly, not paginated
       setUserProperties(Array.isArray(properties) ? properties : []);
     } catch (error) {
-      console.error('Failed to fetch properties:', error);
-      toast.error('Failed to load properties');
+      console.error("Failed to fetch properties:", error);
+      toast.error("Failed to load properties");
     } finally {
       setLoadingProperties(false);
     }
@@ -146,30 +189,46 @@ const AdminUsers = () => {
   const handleTogglePropertyActive = async (property: Property) => {
     try {
       await api.togglePropertyActive(property.id, !property.is_active);
-      toast.success(`Property ${property.is_active ? 'deactivated' : 'activated'} successfully`);
+      toast.success(
+        `Property ${
+          property.is_active ? "deactivated" : "activated"
+        } successfully`
+      );
       // Refresh properties
       if (selectedUser) {
-        const refreshedProperties = await api.getPropertiesByOwner(selectedUser.user.username);
-        setUserProperties(Array.isArray(refreshedProperties) ? refreshedProperties : []);
+        const refreshedProperties = await api.getPropertiesByOwner(
+          selectedUser.user.username
+        );
+        setUserProperties(
+          Array.isArray(refreshedProperties) ? refreshedProperties : []
+        );
       }
     } catch (error) {
-      console.error('Failed to toggle property active:', error);
-      toast.error('Failed to update property status');
+      console.error("Failed to toggle property active:", error);
+      toast.error("Failed to update property status");
     }
   };
 
   const handleTogglePropertyVerified = async (property: Property) => {
     try {
       await api.togglePropertyVerified(property.id, !property.is_verified);
-      toast.success(`Property ${property.is_verified ? 'unverified' : 'verified'} successfully`);
+      toast.success(
+        `Property ${
+          property.is_verified ? "unverified" : "verified"
+        } successfully`
+      );
       // Refresh properties
       if (selectedUser) {
-        const refreshedProperties = await api.getPropertiesByOwner(selectedUser.user.username);
-        setUserProperties(Array.isArray(refreshedProperties) ? refreshedProperties : []);
+        const refreshedProperties = await api.getPropertiesByOwner(
+          selectedUser.user.username
+        );
+        setUserProperties(
+          Array.isArray(refreshedProperties) ? refreshedProperties : []
+        );
       }
     } catch (error) {
-      console.error('Failed to toggle property verified:', error);
-      toast.error('Failed to update property verification status');
+      console.error("Failed to toggle property verified:", error);
+      toast.error("Failed to update property verification status");
     }
   };
 
@@ -177,15 +236,19 @@ const AdminUsers = () => {
     try {
       const slug = propertyTypeToSlug(property.property_type);
       await api.deleteProperty(slug, property.id);
-      toast.success('Property deleted successfully');
+      toast.success("Property deleted successfully");
       // Refresh properties
       if (selectedUser) {
-        const refreshedProperties = await api.getPropertiesByOwner(selectedUser.user.username);
-        setUserProperties(Array.isArray(refreshedProperties) ? refreshedProperties : []);
+        const refreshedProperties = await api.getPropertiesByOwner(
+          selectedUser.user.username
+        );
+        setUserProperties(
+          Array.isArray(refreshedProperties) ? refreshedProperties : []
+        );
       }
     } catch (error) {
-      console.error('Failed to delete property:', error);
-      toast.error('Failed to delete property');
+      console.error("Failed to delete property:", error);
+      toast.error("Failed to delete property");
     }
   };
 
@@ -210,10 +273,14 @@ const AdminUsers = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">User Management</h1>
-              <p className="text-muted-foreground">View and manage user profiles and properties</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                User Management
+              </h1>
+              <p className="text-muted-foreground">
+                View and manage user profiles and properties
+              </p>
             </div>
-            <Button onClick={() => navigate('/admin')} variant="outline">
+            <Button onClick={() => navigate.push("/admin")} variant="outline">
               View Dashboard
             </Button>
           </div>
@@ -226,7 +293,9 @@ const AdminUsers = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">User Type</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    User Type
+                  </label>
                   <Select value={userType} onValueChange={setUserType}>
                     <SelectTrigger>
                       <SelectValue />
@@ -250,7 +319,9 @@ const AdminUsers = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Search by Email</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Search by Email
+                  </label>
                   <Input
                     placeholder="Enter email address..."
                     value={searchEmail}
@@ -282,9 +353,15 @@ const AdminUsers = () => {
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <Avatar className="h-16 w-16">
-                            <AvatarImage src={item.profile.image_key ? `https://pub-3374ba4e11cc4c82ba1742c8f1d3da96.r2.dev/${item.profile.image_key}` : undefined} />
+                            <AvatarImage
+                              src={
+                                item.profile.image_key
+                                  ? `https://pub-3374ba4e11cc4c82ba1742c8f1d3da96.r2.dev/${item.profile.image_key}`
+                                  : undefined
+                              }
+                            />
                             <AvatarFallback>
-                              {item.profile_type === 'company' ? (
+                              {item.profile_type === "company" ? (
                                 <Building2 className="h-8 w-8" />
                               ) : (
                                 <User className="h-8 w-8" />
@@ -295,12 +372,23 @@ const AdminUsers = () => {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <h3 className="text-lg font-semibold">
-                                {item.profile_type === 'company' 
-                                  ? (item.profile as CompanyProfile).company_name 
+                                {item.profile_type === "company"
+                                  ? (item.profile as CompanyProfile)
+                                      .company_name
                                   : `${item.user.first_name} ${item.user.last_name}`}
                               </h3>
-                              <Badge variant={item.profile_type === 'company' ? 'default' : 'secondary'}>
-                                {item.profile_type === 'company' ? <Building2 className="h-3 w-3 mr-1" /> : <User className="h-3 w-3 mr-1" />}
+                              <Badge
+                                variant={
+                                  item.profile_type === "company"
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
+                                {item.profile_type === "company" ? (
+                                  <Building2 className="h-3 w-3 mr-1" />
+                                ) : (
+                                  <User className="h-3 w-3 mr-1" />
+                                )}
                                 {item.profile_type}
                               </Badge>
                             </div>
@@ -364,9 +452,15 @@ const AdminUsers = () => {
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={selectedUser.profile.image_key ? `https://pub-3374ba4e11cc4c82ba1742c8f1d3da96.r2.dev/${selectedUser.profile.image_key}` : undefined} />
+                  <AvatarImage
+                    src={
+                      selectedUser.profile.image_key
+                        ? `https://pub-3374ba4e11cc4c82ba1742c8f1d3da96.r2.dev/${selectedUser.profile.image_key}`
+                        : undefined
+                    }
+                  />
                   <AvatarFallback>
-                    {selectedUser.profile_type === 'company' ? (
+                    {selectedUser.profile_type === "company" ? (
                       <Building2 className="h-10 w-10" />
                     ) : (
                       <User className="h-10 w-10" />
@@ -375,17 +469,21 @@ const AdminUsers = () => {
                 </Avatar>
                 <div>
                   <h3 className="text-xl font-semibold">
-                    {selectedUser.profile_type === 'company' 
-                      ? (selectedUser.profile as CompanyProfile).company_name 
+                    {selectedUser.profile_type === "company"
+                      ? (selectedUser.profile as CompanyProfile).company_name
                       : `${selectedUser.user.first_name} ${selectedUser.user.last_name}`}
                   </h3>
-                  <p className="text-muted-foreground">@{selectedUser.user.username}</p>
-                  <p className="text-sm text-muted-foreground">{selectedUser.user.email}</p>
+                  <p className="text-muted-foreground">
+                    @{selectedUser.user.username}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedUser.user.email}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {selectedUser.profile_type === 'company' ? (
+                {selectedUser.profile_type === "company" ? (
                   <>
                     {(selectedUser.profile as CompanyProfile).company_name && (
                       <div>
@@ -393,7 +491,12 @@ const AdminUsers = () => {
                           <Building2 className="h-4 w-4" />
                           Company Name
                         </label>
-                        <p className="text-muted-foreground">{(selectedUser.profile as CompanyProfile).company_name}</p>
+                        <p className="text-muted-foreground">
+                          {
+                            (selectedUser.profile as CompanyProfile)
+                              .company_name
+                          }
+                        </p>
                       </div>
                     )}
                     {(selectedUser.profile as CompanyProfile).website && (
@@ -402,15 +505,26 @@ const AdminUsers = () => {
                           <Globe className="h-4 w-4" />
                           Website
                         </label>
-                        <a href={(selectedUser.profile as CompanyProfile).website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        <a
+                          href={
+                            (selectedUser.profile as CompanyProfile).website
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
                           {(selectedUser.profile as CompanyProfile).website}
                         </a>
                       </div>
                     )}
                     {(selectedUser.profile as CompanyProfile).description && (
                       <div className="col-span-2">
-                        <label className="text-sm font-medium">Description</label>
-                        <p className="text-muted-foreground">{(selectedUser.profile as CompanyProfile).description}</p>
+                        <label className="text-sm font-medium">
+                          Description
+                        </label>
+                        <p className="text-muted-foreground">
+                          {(selectedUser.profile as CompanyProfile).description}
+                        </p>
                       </div>
                     )}
                   </>
@@ -422,34 +536,46 @@ const AdminUsers = () => {
                           <User className="h-4 w-4" />
                           Gender
                         </label>
-                        <p className="text-muted-foreground capitalize">{(selectedUser.profile as PersonalProfile).gender}</p>
+                        <p className="text-muted-foreground capitalize">
+                          {(selectedUser.profile as PersonalProfile).gender}
+                        </p>
                       </div>
                     )}
-                    {(selectedUser.profile as PersonalProfile).date_of_birth && (
+                    {(selectedUser.profile as PersonalProfile)
+                      .date_of_birth && (
                       <div>
                         <label className="text-sm font-medium flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           Date of Birth
                         </label>
-                        <p className="text-muted-foreground">{(selectedUser.profile as PersonalProfile).date_of_birth}</p>
+                        <p className="text-muted-foreground">
+                          {
+                            (selectedUser.profile as PersonalProfile)
+                              .date_of_birth
+                          }
+                        </p>
                       </div>
                     )}
                     {(selectedUser.profile as PersonalProfile).bio && (
                       <div className="col-span-2">
                         <label className="text-sm font-medium">Bio</label>
-                        <p className="text-muted-foreground">{(selectedUser.profile as PersonalProfile).bio}</p>
+                        <p className="text-muted-foreground">
+                          {(selectedUser.profile as PersonalProfile).bio}
+                        </p>
                       </div>
                     )}
                   </>
                 )}
-                
+
                 {selectedUser.profile.state && (
                   <div>
                     <label className="text-sm font-medium flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
                       State
                     </label>
-                    <p className="text-muted-foreground">{selectedUser.profile.state}</p>
+                    <p className="text-muted-foreground">
+                      {selectedUser.profile.state}
+                    </p>
                   </div>
                 )}
                 {selectedUser.profile.address && (
@@ -458,47 +584,75 @@ const AdminUsers = () => {
                       <MapPin className="h-4 w-4" />
                       Address
                     </label>
-                    <p className="text-muted-foreground">{selectedUser.profile.address}</p>
+                    <p className="text-muted-foreground">
+                      {selectedUser.profile.address}
+                    </p>
                   </div>
                 )}
               </div>
 
               {/* Social Media Links */}
-              {(selectedUser.profile.facebook_url || selectedUser.profile.x_url || selectedUser.profile.linkedin_url || selectedUser.profile.instagram_url || selectedUser.profile.tiktok_url) && (
+              {(selectedUser.profile.facebook_url ||
+                selectedUser.profile.x_url ||
+                selectedUser.profile.linkedin_url ||
+                selectedUser.profile.instagram_url ||
+                selectedUser.profile.tiktok_url) && (
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Social Media</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Social Media
+                  </label>
                   <div className="flex flex-wrap gap-2">
                     {selectedUser.profile.facebook_url && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={selectedUser.profile.facebook_url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={selectedUser.profile.facebook_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           Facebook
                         </a>
                       </Button>
                     )}
                     {selectedUser.profile.x_url && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={selectedUser.profile.x_url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={selectedUser.profile.x_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           X (Twitter)
                         </a>
                       </Button>
                     )}
                     {selectedUser.profile.linkedin_url && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={selectedUser.profile.linkedin_url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={selectedUser.profile.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           LinkedIn
                         </a>
                       </Button>
                     )}
                     {selectedUser.profile.instagram_url && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={selectedUser.profile.instagram_url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={selectedUser.profile.instagram_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           Instagram
                         </a>
                       </Button>
                     )}
                     {selectedUser.profile.tiktok_url && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={selectedUser.profile.tiktok_url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={selectedUser.profile.tiktok_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           TikTok
                         </a>
                       </Button>
@@ -512,7 +666,10 @@ const AdminUsers = () => {
       </Dialog>
 
       {/* Properties Dialog */}
-      <Dialog open={showPropertiesDialog} onOpenChange={setShowPropertiesDialog}>
+      <Dialog
+        open={showPropertiesDialog}
+        onOpenChange={setShowPropertiesDialog}
+      >
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>User Properties</DialogTitle>
@@ -540,8 +697,12 @@ const AdminUsers = () => {
                   <TableRow key={property.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{property.name || 'Unnamed'}</div>
-                        <div className="text-sm text-muted-foreground">{property.address}</div>
+                        <div className="font-medium">
+                          {property.name || "Unnamed"}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {property.address}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -549,11 +710,16 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Badge variant={property.is_active ? 'default' : 'secondary'}>
-                          {property.is_active ? 'Active' : 'Inactive'}
+                        <Badge
+                          variant={property.is_active ? "default" : "secondary"}
+                        >
+                          {property.is_active ? "Active" : "Inactive"}
                         </Badge>
                         {property.is_verified && (
-                          <Badge variant="outline" className="bg-green-500/10 text-green-500">
+                          <Badge
+                            variant="outline"
+                            className="bg-green-500/10 text-green-500"
+                          >
                             Verified
                           </Badge>
                         )}
@@ -604,14 +770,19 @@ const AdminUsers = () => {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete Property
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this property? This action cannot be undone.
+                                Are you sure you want to delete this property?
+                                This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteProperty(property)}>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteProperty(property)}
+                              >
                                 Delete
                               </AlertDialogAction>
                             </AlertDialogFooter>

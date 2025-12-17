@@ -1,5 +1,5 @@
+'use client";';
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Card,
@@ -21,11 +21,13 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import DashboardSidebar from "@/components/DashboardSidebar";
-import { api } from "../lib/api";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { api } from "@/lib/api";
 
 const Dashboard = () => {
   const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [stats, setStats] = useState({
     total_properties: 0,
     active_listings: 0,
@@ -35,7 +37,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate.push("/login");
     }
   }, [isAuthenticated, navigate]);
 

@@ -1,6 +1,7 @@
 // API configuration and helper functions for the Globassets backend
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL
 
 /**
  * Maps property types between API response format and URL endpoint format
@@ -51,7 +52,11 @@ interface ApiError {
 }
 
 // Helper function to get auth headers
-export const getAuthHeaders = () => {
+export const getAuthHeaders = (): Record<string, string> => {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    return {};
+  }
   const token = localStorage.getItem('access_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
@@ -702,20 +707,23 @@ export const api = {
     return await response.json();
   },
 
-  togglePropertyVerified: async (id: string, isVerified: boolean) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/properties/browse/${id}/`, {
-      method: 'PATCH',
+togglePropertyVerified: async (id: string, isVerified: boolean) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/properties/browse/${id}/`,
+    {
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...getAuthHeaders(),
       },
       body: JSON.stringify({ is_verified: isVerified }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to toggle property verified status');
     }
+  );
 
-    return await response.json();
-  },
+  if (!response.ok) {
+    throw new Error("Failed to toggle property verified status");
+  }
+
+  return response.json();
+}
 };

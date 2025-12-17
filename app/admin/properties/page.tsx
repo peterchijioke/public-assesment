@@ -1,16 +1,40 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { api, propertyTypeToSlug } from '@/lib/api';
-import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
-import { toast } from 'sonner';
+"use client";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { api, propertyTypeToSlug } from "@/lib/api";
+import Navbar from "@/components/Navbar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Property {
   id: string;
@@ -33,17 +57,17 @@ interface Property {
 
 const AdminProperties = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filterActive, setFilterActive] = useState<string>('all');
-  const [filterVerified, setFilterVerified] = useState<string>('all');
+  const [filterActive, setFilterActive] = useState<string>("all");
+  const [filterVerified, setFilterVerified] = useState<string>("all");
   const [totalProperties, setTotalProperties] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      navigate('/login');
+      navigate.push("/login");
       return;
     }
   }, [isAuthenticated, authLoading, navigate]);
@@ -53,16 +77,17 @@ const AdminProperties = () => {
       try {
         setIsLoading(true);
         const params = new URLSearchParams();
-        if (filterActive !== 'all') params.append('is_active', filterActive);
-        if (filterVerified !== 'all') params.append('is_verified', filterVerified);
-        params.append('page', currentPage.toString());
+        if (filterActive !== "all") params.append("is_active", filterActive);
+        if (filterVerified !== "all")
+          params.append("is_verified", filterVerified);
+        params.append("page", currentPage.toString());
 
         const response = await api.browseProperties(params.toString());
         setProperties(response.results || []);
         setTotalProperties(response.count || 0);
       } catch (error) {
-        console.error('Failed to fetch properties:', error);
-        toast.error('Failed to load properties');
+        console.error("Failed to fetch properties:", error);
+        toast.error("Failed to load properties");
       } finally {
         setIsLoading(false);
       }
@@ -76,34 +101,44 @@ const AdminProperties = () => {
   const handleTogglePropertyActive = async (property: Property) => {
     try {
       await api.togglePropertyActive(property.id, !property.is_active);
-      toast.success(`Property ${property.is_active ? 'deactivated' : 'activated'} successfully`);
+      toast.success(
+        `Property ${
+          property.is_active ? "deactivated" : "activated"
+        } successfully`
+      );
       // Refresh properties
       const params = new URLSearchParams();
-      if (filterActive !== 'all') params.append('is_active', filterActive);
-      if (filterVerified !== 'all') params.append('is_verified', filterVerified);
-      params.append('page', currentPage.toString());
+      if (filterActive !== "all") params.append("is_active", filterActive);
+      if (filterVerified !== "all")
+        params.append("is_verified", filterVerified);
+      params.append("page", currentPage.toString());
       const response = await api.browseProperties(params.toString());
       setProperties(response.results || []);
     } catch (error) {
-      console.error('Failed to toggle property active:', error);
-      toast.error('Failed to update property status');
+      console.error("Failed to toggle property active:", error);
+      toast.error("Failed to update property status");
     }
   };
 
   const handleTogglePropertyVerified = async (property: Property) => {
     try {
       await api.togglePropertyVerified(property.id, !property.is_verified);
-      toast.success(`Property ${property.is_verified ? 'unverified' : 'verified'} successfully`);
+      toast.success(
+        `Property ${
+          property.is_verified ? "unverified" : "verified"
+        } successfully`
+      );
       // Refresh properties
       const params = new URLSearchParams();
-      if (filterActive !== 'all') params.append('is_active', filterActive);
-      if (filterVerified !== 'all') params.append('is_verified', filterVerified);
-      params.append('page', currentPage.toString());
+      if (filterActive !== "all") params.append("is_active", filterActive);
+      if (filterVerified !== "all")
+        params.append("is_verified", filterVerified);
+      params.append("page", currentPage.toString());
       const response = await api.browseProperties(params.toString());
       setProperties(response.results || []);
     } catch (error) {
-      console.error('Failed to toggle property verified:', error);
-      toast.error('Failed to update property verification status');
+      console.error("Failed to toggle property verified:", error);
+      toast.error("Failed to update property verification status");
     }
   };
 
@@ -111,18 +146,19 @@ const AdminProperties = () => {
     try {
       const slug = propertyTypeToSlug(property.property_type);
       await api.deleteProperty(slug, property.id);
-      toast.success('Property deleted successfully');
+      toast.success("Property deleted successfully");
       // Refresh properties
       const params = new URLSearchParams();
-      if (filterActive !== 'all') params.append('is_active', filterActive);
-      if (filterVerified !== 'all') params.append('is_verified', filterVerified);
-      params.append('page', currentPage.toString());
+      if (filterActive !== "all") params.append("is_active", filterActive);
+      if (filterVerified !== "all")
+        params.append("is_verified", filterVerified);
+      params.append("page", currentPage.toString());
       const response = await api.browseProperties(params.toString());
       setProperties(response.results || []);
       setTotalProperties(response.count || 0);
     } catch (error) {
-      console.error('Failed to delete property:', error);
-      toast.error('Failed to delete property');
+      console.error("Failed to delete property:", error);
+      toast.error("Failed to delete property");
     }
   };
 
@@ -147,10 +183,14 @@ const AdminProperties = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">Property Management</h1>
-              <p className="text-muted-foreground">View and manage all properties</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Property Management
+              </h1>
+              <p className="text-muted-foreground">
+                View and manage all properties
+              </p>
             </div>
-            <Button onClick={() => navigate('/admin')} variant="outline">
+            <Button onClick={() => navigate.push("/admin")} variant="outline">
               View Dashboard
             </Button>
           </div>
@@ -163,7 +203,9 @@ const AdminProperties = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Active Status</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Active Status
+                  </label>
                   <Select value={filterActive} onValueChange={setFilterActive}>
                     <SelectTrigger>
                       <SelectValue />
@@ -177,8 +219,13 @@ const AdminProperties = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Verification Status</label>
-                  <Select value={filterVerified} onValueChange={setFilterVerified}>
+                  <label className="text-sm font-medium mb-2 block">
+                    Verification Status
+                  </label>
+                  <Select
+                    value={filterVerified}
+                    onValueChange={setFilterVerified}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -224,32 +271,52 @@ const AdminProperties = () => {
                       <TableRow key={property.id}>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{property.name || 'Unnamed'}</div>
-                            <div className="text-sm text-muted-foreground">{property.address}</div>
+                            <div className="font-medium">
+                              {property.name || "Unnamed"}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {property.address}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{property.property_type}</Badge>
+                          <Badge variant="outline">
+                            {property.property_type}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{property.owner.first_name} {property.owner.last_name}</div>
-                            <div className="text-sm text-muted-foreground">@{property.owner.username}</div>
+                            <div className="font-medium">
+                              {property.owner.first_name}{" "}
+                              {property.owner.last_name}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              @{property.owner.username}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
                             <div>{property.region.name}</div>
-                            <div className="text-muted-foreground">{property.state.name}</div>
+                            <div className="text-muted-foreground">
+                              {property.state.name}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Badge variant={property.is_active ? 'default' : 'secondary'}>
-                              {property.is_active ? 'Active' : 'Inactive'}
+                            <Badge
+                              variant={
+                                property.is_active ? "default" : "secondary"
+                              }
+                            >
+                              {property.is_active ? "Active" : "Inactive"}
                             </Badge>
                             {property.is_verified && (
-                              <Badge variant="outline" className="bg-green-500/10 text-green-500">
+                              <Badge
+                                variant="outline"
+                                className="bg-green-500/10 text-green-500"
+                              >
                                 Verified
                               </Badge>
                             )}
@@ -260,7 +327,9 @@ const AdminProperties = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleTogglePropertyActive(property)}
+                              onClick={() =>
+                                handleTogglePropertyActive(property)
+                              }
                             >
                               {property.is_active ? (
                                 <>
@@ -277,7 +346,9 @@ const AdminProperties = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleTogglePropertyVerified(property)}
+                              onClick={() =>
+                                handleTogglePropertyVerified(property)
+                              }
                             >
                               {property.is_verified ? (
                                 <>
@@ -300,14 +371,21 @@ const AdminProperties = () => {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                  <AlertDialogTitle>
+                                    Delete Property
+                                  </AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to delete this property? This action cannot be undone.
+                                    Are you sure you want to delete this
+                                    property? This action cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteProperty(property)}>
+                                  <AlertDialogAction
+                                    onClick={() =>
+                                      handleDeleteProperty(property)
+                                    }
+                                  >
                                     Delete
                                   </AlertDialogAction>
                                 </AlertDialogFooter>

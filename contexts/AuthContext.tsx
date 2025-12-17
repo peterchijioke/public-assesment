@@ -1,5 +1,12 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { api } from '@/lib/api';
+"use client";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { api } from "@/lib/api";
 
 interface User {
   email: string;
@@ -16,7 +23,7 @@ interface AuthContextType {
     first_name: string;
     last_name?: string;
     password: string;
-    role: 'personal' | 'company';
+    role: "personal" | "company";
   }) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -29,14 +36,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const email = localStorage.getItem('user_email');
-    const role = localStorage.getItem('user_role');
-    const token = localStorage.getItem('access_token');
+    const email = localStorage.getItem("user_email");
+    const role = localStorage.getItem("user_role");
+    const token = localStorage.getItem("access_token");
 
     if (email && role && token) {
       setUser({ email, role });
     }
-    
+
     setIsLoading(false);
   }, []);
 
@@ -50,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     first_name: string;
     last_name?: string;
     password: string;
-    role: 'personal' | 'company';
+    role: "personal" | "company";
   }) => {
     await api.register(data);
     // Auto-login after registration
@@ -81,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

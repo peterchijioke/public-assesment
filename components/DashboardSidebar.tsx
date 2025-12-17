@@ -1,19 +1,21 @@
+"use client";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
 import { Home, Building2, Upload, Menu, X, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 interface DashboardSidebarProps {
   userRole: "personal" | "company";
 }
 
 const DashboardSidebar = ({ userRole }: DashboardSidebarProps) => {
-  const location = useLocation();
+  const location = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location === path;
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   const personalLinks = [

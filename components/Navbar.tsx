@@ -1,15 +1,18 @@
+'use client";';
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Building2, LogOut, Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
+  const location = usePathname();
   const { isAuthenticated, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location === path;
 
   const handleLogout = async () => {
     await logout();
@@ -110,7 +113,7 @@ const Navbar = () => {
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-70 sm:w-87.5">
+            <SheetContent side="right" className="w-70 sm:w-[350px]">
               <div className="flex flex-col gap-6 mt-8">
                 <Link
                   href="/"
