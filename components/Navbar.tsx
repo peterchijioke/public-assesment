@@ -1,4 +1,4 @@
-'use client";';
+"use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -68,8 +68,7 @@ const Navbar = () => {
             <Link
               href="/dashboard"
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/dashboard") ||
-                location.pathname.startsWith("/dashboard")
+                isActive("/dashboard") || location.startsWith("/dashboard")
                   ? "text-primary"
                   : "text-muted-foreground"
               }`}
@@ -163,7 +162,7 @@ const Navbar = () => {
                     onClick={closeMobileMenu}
                     className={`text-lg font-medium transition-colors hover:text-primary ${
                       isActive("/dashboard") ||
-                      location.pathname.startsWith("/dashboard")
+                      location.startsWith("/dashboard")
                         ? "text-primary"
                         : "text-muted-foreground"
                     }`}

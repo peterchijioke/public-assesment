@@ -73,9 +73,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 const PropertyUpload = () => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useRouter();
-  const [searchParams] = useSearchParams();
-  const editPropertyId = searchParams.find((item) => item === "edit");
   const { toast } = useToast();
+  const [editPropertyId, setEditPropertyId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingProperty, setIsLoadingProperty] = useState(false);
@@ -95,17 +94,20 @@ const PropertyUpload = () => {
   const [isCreatingRegion, setIsCreatingRegion] = useState(false);
   const [stateDropdownOpen, setStateDropdownOpen] = useState(false);
 
-  // Image upload state
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [existingImages, setExistingImages] = useState<PropertyImage[]>([]);
-  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]); // Track image IDs to delete
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
-  // Form state
   const [listerRole, setListerRole] = useState<ListerRole>(null);
   const [propertyType, setPropertyType] = useState<PropertyType | "">("");
   const [formData, setFormData] = useState<any>({});
+
+  useEffect(() => {
+    const searchParams = useSearchParams();
+    setEditPropertyId(searchParams.get("edit"));
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -113,7 +115,6 @@ const PropertyUpload = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Load existing property data when in edit mode
   useEffect(() => {
     const loadProperty = async () => {
       if (!editPropertyId) return;
@@ -123,11 +124,9 @@ const PropertyUpload = () => {
         const property = await api.getPropertyById(editPropertyId);
         setExistingProperty(property);
 
-        // Pre-fill form data
         setPropertyType(property.property_type);
         setListerRole(property.lister_role);
 
-        // Pre-fill form fields
         const data: any = {
           address: property.address,
           state_id: property.state.id,
