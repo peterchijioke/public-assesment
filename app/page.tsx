@@ -210,7 +210,7 @@ const Home = () => {
       </section>
 
       {/* Featured Properties */}
-      <section className="py-16 px-4 bg-accent/30 w-full">
+      <section className="py-16 px-4 bg-accent/15 w-full">
         <div className="container mx-auto w-full">
           <div className="flex items-center justify-between mb-8">
             <div>
